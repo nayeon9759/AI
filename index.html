@@ -1,12 +1,4 @@
 <!DOCTYPE html>
-<!--
-Created using JS Bin
-http://jsbin.com
-
-Copyright (c) 2025 by nayeon9759 (http://jsbin.com/nihedux/2/edit)
-
-Released under the MIT license: http://jsbin.mit-license.org
--->
 <meta name="robots" content="noindex">
 <meta name="robots" content="noindex">
 <meta name="robots" content="noindex">
@@ -18,12 +10,14 @@ Released under the MIT license: http://jsbin.mit-license.org
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 커스텀 폰트 및 애니메이션 */
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Orbitron:wght&family=Noto+Sans+KR:wght+400;700;900&family=Noto+Serif+KR:wght+400;700;900&display=swap');
+        /* Noto Sans KR 대신 Pretendard 폰트 추가 (세련되고 가독성 높은 폰트) */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Orbitron:wght&display=swap');
 
         .cyber-font { font-family: 'Orbitron', sans-serif; }
         .mono-font { font-family: 'Fira Code', monospace; }
-        .kr-font { font-family: 'Noto Sans KR', sans-serif; }
-        .serif-font { font-family: 'Noto Serif KR', serif; }
+        .kr-font { font-family: 'Pretendard', 'Noto Sans KR', sans-serif; } /* Pretendard 적용 */
+        .serif-font { font-family: 'Pretendard', 'Noto Serif KR', serif; } /* Pretendard 적용 */
 
         /* 배경 스캔라인 효과 */
         .scanlines {
@@ -73,6 +67,14 @@ Released under the MIT license: http://jsbin.mit-license.org
                 0 0 5px rgba(0, 255, 255, 0.6), 
                 0 0 10px rgba(0, 255, 255, 0.4); 
         }
+        /* <--- 추가된 부분: 녹색 네온 글로우 효과 정의 ---> */
+        .text-neon-green {
+            color: #38ff38; /* Bright green */
+            text-shadow: 
+                0 0 5px rgba(56, 255, 56, 0.6), 
+                0 0 10px rgba(56, 255, 56, 0.4);
+        }
+        /* <--- 추가된 부분 끝 ---> */
         .text-neon-purple {
             color: #d8b4fe;
             text-shadow: 
@@ -194,12 +196,12 @@ Released under the MIT license: http://jsbin.mit-license.org
     <section id="experiment" class="relative flex flex-col items-center justify-center p-6 border-b border-gray-800 bg-gray-950 min-h-screen py-20">
         <div class="flex flex-col items-center mb-16 z-10 w-full max-w-7xl mx-auto relative"> 
             <button id="guide-modal-open-btn" class="absolute top-0 right-6 md:right-4 px-4 py-2 border border-green-500/50 text-sm md:text-base kr-font text-green-400 rounded hover:bg-green-900/20 transition-all hover:border-green-400 flex items-center gap-2 backdrop-blur-md">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-terminal"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="17" y2="17"/></svg>
                 실험 가이드
             </button>
             <div class="flex flex-col items-center w-full px-6 md:px-4"> 
+            
                 <h2 class="text-3xl md:text-5xl font-bold cyber-font text-neon-cyan text-center">
-                    <span class="text-sm kr-font text-green-400 block mb-2 tracking-widest text-shadow-neon-green-subtle">[Section 1: 실험]</span>
+                    <span class="text-sm kr-font text-neon-green block mb-2 tracking-widest">[Section 1: 실험]</span>
                     지식 주입 실험 시뮬레이터
                 </h2>
                 <p class="text-sm md:text-lg kr-font text-gray-400 mt-4 max-w-2xl text-center">
@@ -305,60 +307,69 @@ Released under the MIT license: http://jsbin.mit-license.org
     </section>
 
     <section id="observation" class="min-h-screen bg-gray-950 relative flex flex-col items-center justify-center p-6 border-b border-gray-800 py-20">
-    <div class="max-w-4xl w-full z-10">
-       <div class="flex flex-col items-center mb-8"> 
-            <h2 class="text-3xl md:text-5xl font-bold cyber-font text-neon-cyan text-center">
-                <span class="text-sm kr-font text-green-400 block mb-2 tracking-widest text-shadow-neon-green-subtle text-center">
-                    [Section 2: 관찰]
-                </span>
-                우리는 이미 생각하는 법을 잊었습니다.
-            </h2>
-            <div class="flex items-center gap-4 mt-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye text-red-500 animate-pulse">
-                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <p class="text-base text-red-400 kr-font mono-font">[RECORDING ACTIVE]</p>
-            </div>
-        </div>
-
-        <div class="relative p-4 bg-gray-900 rounded-xl border-4 border-cyan-500 shadow-[0_0_25px_rgba(0,255,255,0.4)] overflow-hidden group">
-            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 pointer-events-none z-20"></div>
+        <div class="max-w-4xl w-full z-10">
+           <div class="flex flex-col items-center mb-8"> 
             
-            <iframe 
-                width="100%" 
-                height="100%"
-                src="https://www.youtube.com/embed/mEbIJsXaZBc?autoplay=0&mute=0&rel=0" 
-                title="YouTube video player" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                referrerpolicy="strict-origin-when-cross-origin" 
-                allowfullscreen
-                class="block relative overflow-hidden aspect-video transition-transform duration-500 group-hover:scale-[1.01]"
-            ></iframe>
+                <h2 class="text-3xl md:text-5xl font-bold cyber-font text-neon-cyan text-center">
+                    <span class="text-sm kr-font text-neon-green block mb-2 tracking-widest text-center">
+                        [Section 2: 관찰]
+                    </span>
+                    지름길과 고독한 길: 학습의 두 가지 방식
+                </h2>
+                <div class="flex items-center gap-4 mt-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye text-red-500 animate-pulse">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <p class="text-base text-red-400 kr-font mono-font">[RECORDING ACTIVE]</p>
+                </div>
             </div>
 
-        <div class="mt-8 p-6 bg-gray-800/50 rounded-lg border border-red-700/50">
-            <h3 class="text-xl font-bold text-red-400 flex items-center gap-2 mb-3 kr-font">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-warning"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 11v4"/><path d="M12 17h.01"/></svg>
-                주요 관찰 기록
-            </h3>
-            <ul class="list-disc list-inside space-y-3 text-gray-300 ml-4 kr-font">
-                <li>AI를 주요 수단으로 삼는 존과 직접 사고하며 공부하는 타미의 학습 방식을 대비합니다. 
-                  두 학생은 단기적으로 같은 성공을 거두지만, 시간이 흘러 대학에 입학한 후 비정형적인 고난도 문제에 직면합니다. 
-                  존은 AI 시스템의 한계로 인해 사고력이 마비되어 좌절하는 반면, 타미는 오랜 노력으로 쌓은 사고력을 발휘하여 
-                  문제를 해결하고 성공합니다. 궁극적으로 인공지능 도구에 대한 의존이 인간의 비판적 사고 능력을 약화시킬 수 있음을 
-                  극적으로 보여주는 16초 다큐멘터리이다.</li>
-               
-            </ul>
+            <div class="relative p-4 bg-gray-900 rounded-xl border-4 border-cyan-500 shadow-[0_0_25px_rgba(0,255,255,0.4)] overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 pointer-events-none z-20"></div>
+                
+                <a 
+                    href="https://youtu.be/mEbIJsXaZBc?si=Vf-9L9A2S9D8uOQY" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="block relative overflow-hidden aspect-video transition-transform duration-500 group-hover:scale-[1.01]"
+                >
+                    <iframe 
+                        width="100%" 
+                        height="100%"
+                        src="https://www.youtube.com/embed/mEbIJsXaZBc?autoplay=0&mute=0&rel=0" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        referrerpolicy="strict-origin-when-cross-origin" 
+                        allowfullscreen
+                        class="block relative overflow-hidden aspect-video transition-transform duration-500 group-hover:scale-[1.01]"
+                    ></iframe>
+                </a>
+            </div>
+
+            <div class="mt-8 p-6 bg-gray-800/50 rounded-lg border border-red-700/50">
+                <h3 class="text-xl font-bold text-red-400 flex items-center gap-2 mb-3 kr-font">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-warning"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 11v4"/><path d="M12 17h.01"/></svg>
+                    주요 관찰 기록
+                </h3>
+                <ul class="list-disc list-inside space-y-3 text-gray-300 ml-4 kr-font">
+                    <li>AI를 주요 수단으로 삼는 존과 직접 사고하며 공부하는 타미의 학습 방식을 대비합니다. 
+                      두 학생은 단기적으로 같은 성공을 거두지만, 시간이 흘러 대학에 입학한 후 비정형적인 고난도 문제에 직면합니다. 
+                      존은 AI 시스템의 한계로 인해 사고력이 마비되어 좌절하는 반면, 타미는 오랜 노력으로 쌓은 사고력을 발휘하여 
+                      문제를 해결하고 성공합니다. 궁극적으로 인공지능 도구에 대한 의존이 인간의 비판적 사고 능력을 약화시킬 수 있음을 
+                      극적으로 보여주는 다큐멘터리입니다.</li>
+                   
+                </ul>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
     <section id="report" class="min-h-screen bg-gray-950 relative flex flex-col items-center justify-center p-6 border-b border-gray-800 py-20">
         <div class="max-w-7xl w-full z-10">
+          
             <h2 class="text-3xl md:text-5xl font-bold cyber-font text-neon-cyan text-center mb-16">
-                <span class="text-sm kr-font text-green-400 block mb-2 tracking-widest text-shadow-neon-green-subtle">[Section 3: 심층 분석]</span>
+                <span class="text-sm kr-font text-neon-green block mb-2 tracking-widest">[Section 3: 심층 분석]</span>
                 심층 분석 보고서
             </h2>
 
@@ -379,7 +390,8 @@ Released under the MIT license: http://jsbin.mit-license.org
             <div class="absolute bottom-0 right-0 w-full h-1 bg-red-500 animate-pulse"></div>
             
             <div class="flex flex-col items-center mb-12 z-10 w-full border-b-2 border-red-900/50 pb-8">
-                <span class="text-sm kr-font text-green-400 block mb-2 tracking-widest text-shadow-neon-green-subtle">
+                
+                <span class="text-sm kr-font text-neon-green block mb-2 tracking-widest">
                     [Section 4: 최종 결론]
                 </span>
 
@@ -476,33 +488,33 @@ Released under the MIT license: http://jsbin.mit-license.org
         const REPORT_DATA = [
             {
                 id: 'thesis',
-                title: '논문 (인지 부하 전가)',
+                title: '기사 ',
                 icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notebook"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/></svg>',
                 theme: 'blue',
-                code: 'GOOGLE_EFFECT',
+                code: 'Part.1',
                 heading: '인지 부하 전가 (Cognitive Offloading)',
-                content: "인간은 더 이상 정보를 뇌에 저장하지 않는다. 대신 정보가 저장된 '위치'만을 기억하려 한다. 이를 '구글 효과'라 칭하며, 뇌의 해마(Hippocampus) 활동량은 급격히 감소 중이다.",
-                error: "> ERROR: Retrieval failed. Neural pathway not found."
+                content: "인간은 더 이상 정보를 뇌에 저장하지 않고, 정보가 저장된 위치만을 기억하려 한다. 이를 구글 효과라 칭하며, 이는 인지적 오프로딩을 증가시켜 결국 비판적 사고 능력을 약화시킨다.",
+                error: "출처: https://hechingerreport.org/proof-points-a-spate-of-recent-studies-on-the-google-effect-adds-to-evidence-that-the-internet-is-making-us-dumber/"
             },
             {
                 id: 'expert',
-                title: '전문가 의견 (판단력의 외주화)',
+                title: '전문가 의견',
                 icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
                 theme: 'red',
-                code: 'CRITICAL_ATROPHY',
-                heading: '판단력의 외주화',
-                content: "알고리즘이 추천하지 않는 음악을 듣지 않고, AI가 요약하지 않은 글을 읽지 못한다. 주체적 사고 능력은 근육처럼 퇴화하고 있다.",
-                error: "> ERROR: Decision Matrix Locked. User override denied."
+                code: 'Part.2',
+                heading: '기억의 전환',
+                content: "우리가 정보를 저장하는 것이 아니라 정보가 어디에 있는지를 기억하는 쪽으로 전환하고 있으며, 이것이 장기적으로 학습과 지식 보유에 어떤 영향을 미칠지 우려된다.",
+                error: "전문가: 엘리자베스 던킨 (기억 및 인지 과학 연구원)"
             },
             {
                 id: 'myOpinion',
-                title: '나의 의견 (최종 진단)',
+                title: '나의 의견',
                 icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-check"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 17 2 2 4-4"/></svg>',
                 theme: 'green',
-                code: 'FINAL_DIAGNOSIS',
-                heading: '시스템 최종 진단: 지적 주도권 상실',
-                content: "AI 의존 학습과 자발적 노력 학습 시뮬레이션을 통해, 정보 습득의 용이성이 높을수록 장기 기억화 성공률이 현저히 낮아짐을 관찰했습니다. 인간의 뇌는 '바람직한 어려움'을 경험할 때 가장 효율적으로 작동합니다. 외부 도구에 대한 의존은 지적 주도권을 상실하게 만듭니다. 우리는 생각하는 법을 잊었습니다.",
-                error: "> FINAL_DIAGNOSIS: EFFORT_FAILED. Recommend immediate manual input retraining."
+                code: 'Part.3',
+                heading: '인간의 몫, 불편함의 가치',
+                content: "저는 우리가 편리함이라는 달콤한 유혹 속에서, 스스로 사고하는 근육을 잃어가고 있다고 믿습니다. 빠르게 답을 찾는 AI의 효율성은 놀랍지만, 그 대가로 우리는 핵심을 파고드는 고군분투를 포기했습니다. 우리는 정보를 뇌 밖에 외주하는 습관을 들였고, 결국 뇌는 기억의 전환이라는 치명적인 딜레마를 겪고 있습니다.하지만 비판적 사고는 결코 구글 검색창에서 완성되지 않습니다. 그것은 해답이 보이지 않는 막막함, 스스로 부딪히고 깨지며 비효율적인 과정을 기꺼이 감수하는 그 투쟁 속에서만 탄생합니다.만약 우리가 이 불편함을 외면한다면, 우리는 결국 AI의 편리한 답변 속에 스스로의 지성을 포기하게 될 것입니다. 지금이야말로 빠르게 얻은 효율은 오래 지속되지 못한다는 진실을 직시하고, 질문하고, 의심하며, 스스로 답을 찾는 인간의 몫을 되찾아야 할 때입니다.",
+                error: "요약: 지름길의 유혹이 뇌의 지도를 앗아갈 때, 우리는 불편함이라는 나침반을 다시 쥐어야 한다."
             },
         ];
         
@@ -760,7 +772,6 @@ Released under the MIT license: http://jsbin.mit-license.org
                     >
                         <div class="flex items-start justify-between border-b border-gray-700 pb-4 mb-6">
                             <h2 class="text-xl md:text-2xl font-black mono-font text-white flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-terminal inline mr-2 text-green-400"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="17" y2="17"/></svg>
                                 <span class="kr-font">실험 가이드</span>
                             </h2>
                             <button 
@@ -838,7 +849,7 @@ Released under the MIT license: http://jsbin.mit-license.org
 
                             <div class="flex-grow">
                                 <p class="text-lg md:text-xl leading-9 serif-font font-light text-gray-300 break-keep text-justify">
-                                    <span class="text-5xl float-left mr-3 font-bold leading-none mt-[-4px] text-purple-500 font-serif">${pageData.text.charAt(0)}</span>${pageData.text.slice(1)}
+                                    <span class="text-5xl float-left mr-3 font-bold leading-none mt-[-4px] text-purple-500 serif-font">${pageData.text.charAt(0)}</span>${pageData.text.slice(1)}
                                 </p>
                             </div>
 
