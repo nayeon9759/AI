@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2025 by nayeon9759 (http://jsbin.com/nihedux/2/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<meta name="robots" content="noindex">
+<meta name="robots" content="noindex">
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지식 주입 실험 시뮬레이터</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 커스텀 폰트 및 애니메이션 */
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Orbitron:wght&family=Noto+Sans+KR:wght+400;700;900&family=Noto+Serif+KR:wght+400;700;900&display=swap');
+
+        .cyber-font { font-family: 'Orbitron', sans-serif; }
+        .mono-font { font-family: 'Fira Code', monospace; }
+        .kr-font { font-family: 'Noto Sans KR', sans-serif; }
+        .serif-font { font-family: 'Noto Serif KR', serif; }
+
+        /* 배경 스캔라인 효과 */
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            animation: scrollScanlines 10s linear infinite;
+        }
+
+        /* 배경 그리드 패턴 */
+        .bg-grid-pattern {
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        @keyframes scrollScanlines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+        
+        @keyframes float-slow {
+            0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(1deg); }
+            50% { transform: translate(-50%, -50%) translateY(-10px) rotate(-1deg); }
+        }
+        .animate-float-slow {
+            animation: float-slow 8s ease-in-out infinite;
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+
+        /* 네온 텍스트 효과 */
+        .text-neon-cyan {
+            color: #00ffff;
+            text-shadow: 
+                0 0 5px rgba(0, 255, 255, 0.6), 
+                0 0 10px rgba(0, 255, 255, 0.4); 
+        }
+        .text-neon-purple {
+            color: #d8b4fe;
+            text-shadow: 
+                0 0 5px rgba(168, 85, 247, 0.6), 
+                0 0 10px rgba(168, 85, 247, 0.4);
+        }
+        
+        /* 텍스트 선택 방지 */
+        * {
+          -webkit-user-select: none; 
+          -moz-user-select: none;    
+          -ms-user-select: none;     
+          user-select: none;         
+        }
+
+        /* 3D 책 회전 효과 */
+        .cyber-book-spine {
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        .group:hover .cyber-book-spine {
+            transform: rotateY(-15deg) translateX(5px);
+        }
+
+        /* 책 페이지 넘김 효과 */
+        .book-page-enter {
+            animation: pageTurnIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            transform-origin: left center;
+        }
+        @keyframes pageTurnIn {
+            from { opacity: 0; transform: rotateY(-20deg) translateX(10px); }
+            to { opacity: 1; transform: rotateY(0) translateX(0); }
+        }
+
+        /* 타이틀 글리치 효과 애니메이션 */
+        @keyframes glitch-skew {
+            0% { transform: skew(0deg); }
+            20% { transform: skew(-2deg); }
+            40% { transform: skew(2deg); }
+            60% { transform: skew(-1deg); }
+            80% { transform: skew(1deg); }
+            100% { transform: skew(0deg); }
+        }
+        .glitch-hover:hover {
+            animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+            color: #00ffff;
+        }
+    </style>
+</head>
+<body class="bg-black text-gray-200 overflow-x-hidden cursor-crosshair font-sans">
+
+    <div id="progress-bar-container" class="fixed top-0 left-0 w-full h-1 bg-gray-900 z-50">
+        <div id="progress-bar" class="h-full bg-gradient-to-r from-cyan-500 to-purple-600 shadow-[0_0_10px_#00ffff]" style="width: 0%;"></div>
+    </div>
+
+    <header class="fixed top-0 left-0 w-full bg-black/80 border-b border-gray-800 shadow-lg z-40 backdrop-blur-md">
+        <div class="w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center py-4 px-6 relative">
+            <div class="text-xl font-bold cyber-font tracking-widest text-white w-full md:w-auto text-center md:text-left mb-4 md:mb-0">
+                Multidimensional Typography
+            </div>
+            <nav class="flex space-x-6 text-xs md:text-sm mono-font text-gray-400 justify-center w-full md:w-auto">
+                <a href="#experiment" class="hover:text-cyan-400 transition-colors">[SIMULATION]</a>
+                <a href="#observation" class="hover:text-cyan-400 transition-colors">[OBSERVATION]</a>
+                <a href="#report" class="hover:text-cyan-400 transition-colors">[ANALYSIS]</a>
+                <a href="#contact" class="hover:text-red-500 transition-colors">[CONCLUSION]</a>
+            </nav>
+        </div>
+    </header>
+
+    <section 
+        class="min-h-screen relative flex flex-col items-center justify-center p-6 border-b border-gray-800 overflow-hidden"
+    >
+        <div class="absolute inset-0 bg-black z-0"></div>
+        <div class="absolute inset-0 bg-grid-pattern opacity-30 z-0"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black z-10"></div>
+        <div class="scanlines absolute inset-0 pointer-events-none opacity-20 z-10"></div>
+        
+        <div class="relative z-20 w-full max-w-5xl flex flex-col items-center justify-center">
+            
+            <div class="w-full flex items-center justify-center gap-4 mb-8 opacity-70">
+                <div class="h-[1px] w-12 bg-cyan-500"></div>
+                <p class="text-xs md:text-sm mono-font text-cyan-500 tracking-[0.3em]">SYSTEM: ONLINE</p>
+                <div class="h-[1px] w-12 bg-cyan-500"></div>
+            </div>
+
+            <div class="relative p-10 md:p-16 border-y border-gray-700 bg-black/40 backdrop-blur-sm w-full text-center group">
+                <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-cyan-500 transition-all duration-500 group-hover:w-full group-hover:h-full group-hover:opacity-50"></div>
+                <div class="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-purple-500 transition-all duration-500 group-hover:w-full group-hover:h-full group-hover:opacity-50"></div>
+
+                <p class="text-sm md:text-base text-green-400 mb-4 tracking-widest mono-font font-bold">
+                    &lt; PROJECT: COGNITIVE OVERLOAD &gt;
+                </p>
+                
+                <h1 class="text-5xl sm:text-6xl md:text-8xl font-black mb-6 cyber-font leading-tight text-white drop-shadow-2xl glitch-hover cursor-default">
+                    AI 활용 학습<br/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-purple-500">보고서</span>
+                </h1>
+
+                <div class="w-24 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 mx-auto mb-8"></div>
+
+                <div class="inline-flex items-center gap-3 border border-gray-600 rounded-full px-6 py-2 bg-gray-900/50 hover:border-cyan-400 transition-colors">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <span class="text-gray-300 mono-font text-sm md:text-base tracking-wider">
+                        ANALYST ID: <span class="text-white font-bold">22357005 김나연</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center opacity-50 hover:opacity-100 transition-opacity duration-500">
+                <p class="text-[10px] md:text-xs mono-font text-gray-400 tracking-widest mb-2">INITIALIZING SIMULATION SEQUENCE...</p>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down mx-auto text-cyan-500 animate-bounce"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+            </div>
+        </div> 
+    </section>
+
+    <section id="experiment" class="relative flex flex-col items-center justify-center p-6 border-b border-gray-800 bg-gray-950 min-h-screen py-20">
+        <div class="flex flex-col items-center mb-16 z-10 w-full max-w-7xl mx-auto relative"> 
+            <button id="guide-modal-open-btn" class="absolute top-0 right-6 md:right-4 px-4 py-2 border border-green-500/50 text-sm md:text-base kr-font text-green-400 rounded hover:bg-green-900/20 transition-all hover:border-green-400 flex items-center gap-2 backdrop-blur-md">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-terminal"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="17" y2="17"/></svg>
+                실험 가이드
+            </button>
+            <div class="flex flex-col items-center w-full px-6 md:px-4"> 
+                <h2 class="text-3xl md:text-5xl font-bold cyber-font text-neon-cyan text-center">
+                    <span class="text-sm kr-font text-green-400 block mb-2 tracking-widest text-shadow-neon-green-subtle">[Section 1: 실험]</span>
+                    지식 주입 실험 시뮬레이터
+                </h2>
+                <p class="text-sm md:text-lg kr-font text-gray-400 mt-4 max-w-2xl text-center">
+                    AI 의존 학습과 자발적 노력 학습이 장기 기억 저장에 미치는 영향을 비교하는 시뮬레이션
+                </p>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-16 w-full max-w-7xl items-start z-10">
+            <div class="flex flex-col items-center justify-start relative mt-0 md:order-1 w-full"> 
+                <div 
+                    id="brain-container"
+                    class="relative w-full max-w-xs sm:max-w-md md:w-[512px] md:h-[512px] rounded-full border border-gray-700 bg-gray-900/50 backdrop-blur-sm shadow-[0_0_30px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-visible z-10 aspect-square ring-1 ring-cyan-500/20"
+                >
+                    <img src="https://i.imgur.com/FRTPQeI.png" alt="Custom Brain Image" class="w-48 h-48 absolute opacity-60 object-contain rounded-full mix-blend-screen"/>
+                    
+                    <div class="absolute bottom-0 w-full h-20 bg-gradient-to-t from-black/80 to-transparent rounded-b-full"></div>
+                    
+                    <div id="orb-area" class="w-full h-full relative"></div>
+                </div>
+                
+                <div class="text-center mt-8 w-full max-w-xs sm:max-w-md md:w-[512px]"> 
+                    <div class="flex items-center justify-center gap-2 text-red-500 animate-pulse mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span class="text-xs font-bold tracking-widest mono-font">WARNING: VOLATILE MEMORY</span>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mono-font mb-8"> 
+                        경고: 휘발성 지식은 <span class="text-yellow-400">6초</span> 후 소멸합니다. (뇌 공간 안에서만)
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex flex-col space-y-8 md:order-2 w-full mt-10 md:mt-0 justify-center"> 
+                <div class="flex justify-center md:justify-start">
+                    <div 
+                        id="knowledge-box-ai" 
+                        data-source="AI"
+                        class="w-full max-w-xs md:max-w-sm p-1 bg-gradient-to-b from-cyan-500/50 to-transparent rounded-xl cursor-pointer hover:scale-[1.02] transition-transform duration-300"
+                        onclick="openQueryModal()"
+                    >
+                        <div class="bg-gray-900 rounded-lg p-4 h-72 flex flex-col relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            
+                            <div class="flex items-center justify-between mb-4 border-b border-gray-700 pb-2 z-10">
+                                <span class="text-cyan-400 font-bold mono-font flex items-center gap-2 text-base">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg>
+                                    AI INSTANT DATA
+                                </span>
+                                <div class="flex gap-1">
+                                    <div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow flex flex-col justify-center items-center z-10">
+                                <div class="w-full bg-gray-800/50 border border-gray-600 rounded p-3 flex items-center gap-2 text-gray-400 group-hover:border-cyan-400/50 transition-colors">
+                                    <span class="mono-font text-xs flex-grow">Search query...</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                </div>
+                                <p class="mt-4 text-xs text-cyan-600 mono-font text-center">
+                                    >> Click to inject volatile knowledge
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center md:justify-start">
+                    <div 
+                        id="knowledge-box-study" 
+                        class="w-full max-w-xs md:max-w-sm p-1 bg-gradient-to-b from-purple-500/50 to-transparent rounded-xl cursor-pointer hover:scale-[1.02] transition-transform duration-300"
+                        onclick="openStudyModal()"
+                    >
+                         <div class="bg-gray-900 rounded-lg p-4 h-72 flex flex-col relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                            <div class="flex items-center justify-between mb-4 border-b border-gray-700 pb-2 z-10">
+                                <span class="text-purple-400 font-bold mono-font flex items-center gap-2 text-base">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                                    DEEP ARCHIVE
+                                </span>
+                                <div class="flex gap-1">
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow flex flex-col justify-center items-center z-10">
+                                <div class="relative w-24 h-32 bg-gray-800 rounded-r border-l-4 border-purple-600 shadow-xl transform transition-transform duration-500 group-hover:rotate-y-12 group-hover:scale-105 cyber-book-spine flex items-center justify-center">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400/50"><path d="M12 6.5v11"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 0 0-2"/></svg>
+                                </div>
+                                <p class="mt-4 text-xs text-purple-600 mono-font text-center">
+                                    >> Requires 5s deep reading
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="dragging-proxy" class="fixed w-8 h-8 rounded-full z-[100] pointer-events-none mix-blend-screen flex items-center justify-center text-[10px] font-bold text-black kr-font" style="display: none; transform: translate(-50%, -50%);">
+            지식
+        </div>
+    </section>
+
+    <section id="observation" class="min-h-screen bg-gray-950 relative flex flex-col items-center justify-center p-6 border-b border-gray-800 py-20">
+    <div class="max-w-4xl w-full z-10">
+       <div class="flex flex-col items-center mb-8"> 
+            <h2 class="text-3xl md:text-5xl font-bold cyber-font text-neon-cyan text-center">
+                <span class="text-sm kr-font text-green-400 block mb-2 tracking-widest text-shadow-neon-green-subtle text-center">
+                    [Section 2: 관찰]
+                </span>
+                우리는 이미 생각하는 법을 잊었습니다.
+            </h2>
+            <div class="flex items-center gap-4 mt-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye text-red-500 animate-pulse">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <p class="text-base text-red-400 kr-font mono-font">[RECORDING ACTIVE]</p>
+            </div>
+        </div>
+
+        <div class="relative p-4 bg-gray-900 rounded-xl border-4 border-cyan-500 shadow-[0_0_25px_rgba(0,255,255,0.4)] overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 pointer-events-none z-20"></div>
+            
+            <iframe 
+                width="100%" 
+                height="100%"
+                src="https://www.youtube.com/embed/mEbIJsXaZBc?autoplay=0&mute=0&rel=0" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
+                allowfullscreen
+                class="block relative overflow-hidden aspect-video transition-transform duration-500 group-hover:scale-[1.01]"
+            ></iframe>
+            </div>
+
+        <div class="mt-8 p-6 bg-gray-800/50 rounded-lg border border-red-700/50">
+            <h3 class="text-xl font-bold text-red-400 flex items-center gap-2 mb-3 kr-font">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-warning"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 11v4"/><path d="M12 17h.01"/></svg>
+                주요 관찰 기록
+            </h3>
+            <ul class="list-disc list-inside space-y-3 text-gray-300 ml-4 kr-font">
+                <li>AI를 주요 수단으로 삼는 존과 직접 사고하며 공부하는 타미의 학습 방식을 대비합니다. 
+                  두 학생은 단기적으로 같은 성공을 거두지만, 시간이 흘러 대학에 입학한 후 비정형적인 고난도 문제에 직면합니다. 
+                  존은 AI 시스템의 한계로 인해 사고력이 마비되어 좌절하는 반면, 타미는 오랜 노력으로 쌓은 사고력을 발휘하여 
+                  문제를 해결하고 성공합니다. 궁극적으로 인공지능 도구에 대한 의존이 인간의 비판적 사고 능력을 약화시킬 수 있음을 
+                  극적으로 보여주는 16초 다큐멘터리이다.</li>
+               
+            </ul>
+        </div>
+    </div>
+</section>
+
+    <section id="report" class="min-h-screen bg-gray-950 relative flex flex-col items-center justify-center p-6 border-b border-gray-800 py-20">
+        <div class="max-w-7xl w-full z-10">
+            <h2 class="text-3xl md:text-5xl font-bold cyber-font text-neon-cyan text-center mb-16">
+                <span class="text-sm kr-font text-green-400 block mb-2 tracking-widest text-shadow-neon-green-subtle">[Section 3: 심층 분석]</span>
+                심층 분석 보고서
+            </h2>
+
+            <div id="report-cards-container" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="min-h-screen bg-black relative flex flex-col items-center justify-center p-6 z-50 overflow-hidden">
+        <div class="absolute inset-0 bg-black pointer-events-none">
+            <div class="absolute inset-0 bg-red-900/10 animate-pulse-slow"></div>
+            <div class="scanlines opacity-30"></div>
+        </div>
+
+        <div class="relative w-full max-w-5xl bg-gray-900/95 border-4 border-red-600 shadow-[0_0_100px_rgba(220,20,60,0.4)] p-8 md:p-16 rounded-xl flex flex-col items-center text-center backdrop-blur-md transform hover:scale-[1.01] transition-transform duration-500">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30 mix-blend-overlay pointer-events-none"></div>
+            <div class="absolute top-0 left-0 w-full h-1 bg-red-500 animate-pulse"></div>
+            <div class="absolute bottom-0 right-0 w-full h-1 bg-red-500 animate-pulse"></div>
+            
+            <div class="flex flex-col items-center mb-12 z-10 w-full border-b-2 border-red-900/50 pb-8">
+                <span class="text-sm kr-font text-green-400 block mb-2 tracking-widest text-shadow-neon-green-subtle">
+                    [Section 4: 최종 결론]
+                </span>
+
+                <div class="flex items-center gap-3 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle text-red-500 animate-bounce"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                    <h2 class="text-3xl md:text-5xl font-black text-red-500 animate-pulse cyber-font tracking-widest text-shadow-neon-red">
+                        [CRITICAL SYSTEM ALERT]
+                    </h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle text-red-500 animate-bounce"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                </div>
+                
+                <h3 class="text-xl md:text-3xl font-bold text-red-500 cyber-font tracking-wider mb-6">
+                    FATAL DIAGNOSIS.
+                </h3>
+
+                <h3 class="text-2xl md:text-4xl font-bold text-white leading-tight kr-font drop-shadow-2xl">
+                    VERDICT: COGNITIVE SOVEREIGNTY LOST.
+                </h3>
+                <p class="text-sm md:text-lg mono-font text-red-400 mt-2 tracking-widest">
+                    STATUS: IRREVERSIBLE LOSS / AUTONOMOUS THOUGHT CEASED.
+                </p>
+            </div>
+
+            <div class="z-10 mb-12">
+                <h1 class="text-2xl md:text-5xl font-black text-white leading-tight kr-font drop-shadow-2xl">
+                    "지적 주도권이 시스템에 전가된 미래,<br/>
+                    <span class="text-red-500 block mt-4 text-2xl md:text-5xl text-shadow-neon-red">당신은 그저 '관찰자'로 살아가겠습니까?"</span>
+                </h1>
+            </div>
+        </div>
+    </section>
+
+    <footer class="w-full p-4 text-center text-xs text-gray-600 border-t border-gray-900 mono-font bg-black">
+        &copy; 2025 Multidimensional Typography | ANALYST ID: 22357005
+    </footer>
+
+    <div id="modals-container">
+    </div>
+
+
+    <script>
+        // --- GLOBAL STATE ---
+        let isDragging = false;
+        let dragPos = { x: 0, y: 0 };
+        let draggingSource = null;
+        let orbs = [];
+        const gravity = 0.8;
+        const friction = 0.95;
+        const BOWL_SIZE = 512;
+        // 뇌 컨테이너의 크기
+        const BOWL_FLOOR_Y_RELATIVE = BOWL_SIZE * 0.9;
+        const WALL_LEFT_X = BOWL_SIZE * 0.17;
+        const WALL_RIGHT_X = BOWL_SIZE * 0.83;
+        const ORB_RADIUS = 70; 
+        const ORB_REPULSION_STRENGTH = 0.8; 
+        const ORB_REPULSION_DISTANCE_SQUARED = (ORB_RADIUS * 2) * (ORB_RADIUS * 2); 
+        let animationFrameId = null;
+
+        const brainContainer = document.getElementById('brain-container');
+        const orbArea = document.getElementById('orb-area');
+        const draggingProxy = document.getElementById('dragging-proxy');
+        const modalsContainer = document.getElementById('modals-container');
+        const reportCardsContainer = document.getElementById('report-cards-container');
+
+        // Study Book State
+        let currentStudyPage = 0;
+        let studyTimer = null;
+        let studyTimeElapsed = 0;
+        const STUDY_REQUIRED_TIME = 50; // 5 seconds * 10 (interval 100ms)
+        const STUDY_CONTENT = [
+            {
+                title: "제 1장: 깊은 읽기의 힘",
+                text: "훑어보기(Skimming)는 정보의 위치를 파악하는 데 유용하지만, 깊은 이해를 방해합니다. 문장을 천천히 음미하며 읽을 때 뇌의 다양한 영역이 활성화되어 장기 기억으로 전환될 확률이 높아집니다.",
+                knowledge: "훑어보기(Skimming)는 정보의 위치를 파악하는 데 유용하지만, 깊은 이해를 방해합니다. 문장을 천천히 음미하며 읽을 때 뇌의 다양한 영역이 활성화되어 장기 기억으로 전환될 확률이 높아집니다."
+            },
+            {
+                title: "제 2장: 기억의 통합 과정",
+                text: "학습한 내용은 해마에서 대뇌 피질로 이동하며 공고화(Consolidation) 과정을 거칩니다. 이 과정에는 물리적인 시간과 반복적인 자극이 필요합니다. AI 요약본은 이 '시간'을 제거하여 기억의 정착을 방해할 수 있습니다.",
+                knowledge: "학습한 내용은 해마에서 대뇌 피질로 이동하며 공고화(Consolidation) 과정을 거칩니다. 이 과정에는 물리적인 시간과 반복적인 자극이 필요합니다. AI 요약본은 이 '시간'을 제거하여 기억의 정착을 방해할 수 있습니다."
+            },
+            {
+                title: "제 3장: 바람직한 어려움",
+                text: "쉽게 얻은 지식은 쉽게 사라집니다. 로버트 비 Bjork 교수는 '바람직한 어려움(Desirable Difficulty)'이 학습 효율을 높인다고 주장했습니다. 스스로 답을 찾으려는 노력이 뇌 신경망을 강화합니다.",
+                knowledge: "쉽게 얻은 지식은 쉽게 사라집니다. 로버트 비 Bjork 교수는 '바람직한 어려움(Desirable Difficulty)'이 학습 효율을 높인다고 주장했습니다. 스스로 답을 찾으려는 노력이 뇌 신경망을 강화합니다."
+            },
+            {
+                title: "제 4장: 지적 주도권 회복",
+                text: "기술은 도구여야지, 생각의 주체가 되어서는 안 됩니다. 질문을 생성하고, 정보를 비판하며, 스스로 결론을 내리는 힘을 길러야 합니다. 이것이 바로 인간이 AI 시대에 갖춰야 할 진정한 경쟁력입니다.",
+                knowledge: "기술은 도구여야지, 생각의 주체가 되어서는 안 됩니다. 질문을 생성하고, 정보를 비판하며, 스스로 결론을 내리는 힘을 길러야 합니다. 이것이 바로 인간이 AI 시대에 갖춰야 할 진정한 경쟁력입니다."
+            }
+        ];
+
+        // --- DATA ---
+        const REPORT_DATA = [
+            {
+                id: 'thesis',
+                title: '논문 (인지 부하 전가)',
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notebook"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/></svg>',
+                theme: 'blue',
+                code: 'GOOGLE_EFFECT',
+                heading: '인지 부하 전가 (Cognitive Offloading)',
+                content: "인간은 더 이상 정보를 뇌에 저장하지 않는다. 대신 정보가 저장된 '위치'만을 기억하려 한다. 이를 '구글 효과'라 칭하며, 뇌의 해마(Hippocampus) 활동량은 급격히 감소 중이다.",
+                error: "> ERROR: Retrieval failed. Neural pathway not found."
+            },
+            {
+                id: 'expert',
+                title: '전문가 의견 (판단력의 외주화)',
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+                theme: 'red',
+                code: 'CRITICAL_ATROPHY',
+                heading: '판단력의 외주화',
+                content: "알고리즘이 추천하지 않는 음악을 듣지 않고, AI가 요약하지 않은 글을 읽지 못한다. 주체적 사고 능력은 근육처럼 퇴화하고 있다.",
+                error: "> ERROR: Decision Matrix Locked. User override denied."
+            },
+            {
+                id: 'myOpinion',
+                title: '나의 의견 (최종 진단)',
+                icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-check"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 17 2 2 4-4"/></svg>',
+                theme: 'green',
+                code: 'FINAL_DIAGNOSIS',
+                heading: '시스템 최종 진단: 지적 주도권 상실',
+                content: "AI 의존 학습과 자발적 노력 학습 시뮬레이션을 통해, 정보 습득의 용이성이 높을수록 장기 기억화 성공률이 현저히 낮아짐을 관찰했습니다. 인간의 뇌는 '바람직한 어려움'을 경험할 때 가장 효율적으로 작동합니다. 외부 도구에 대한 의존은 지적 주도권을 상실하게 만듭니다. 우리는 생각하는 법을 잊었습니다.",
+                error: "> FINAL_DIAGNOSIS: EFFORT_FAILED. Recommend immediate manual input retraining."
+            },
+        ];
+        
+        // AI 지식 주입을 위한 질문 데이터 (답변 추가)
+        const QUERY_DATA = [
+            { 
+                id: 'Q1', 
+                question: '챗봇의 기본 작동 원리를 요약해줘.',
+                answer: '대규모 언어 모델(LLM)을 기반으로, 입력된 텍스트를 분석해 가장 확률이 높은 다음 단어를 예측하며 문장을 생성합니다.'
+            },
+            { 
+                id: 'Q2', 
+                question: '2차 세계 대전 발발 원인을 간결하게 알려줘.',
+                answer: '베르사유 조약의 불평등, 경제 대공황, 파시즘 및 나치즘의 확산, 그리고 독일의 팽창 정책이 주요 원인이 되었습니다.'
+            },
+            { 
+                id: 'Q3', 
+                question: '아인슈타인의 상대성 이론을 쉽게 설명해줘.',
+                answer: '특수 상대성 이론은 빛의 속도는 일정하며, 시간과 공간은 관찰자의 속도에 따라 상대적이라는 것을 설명합니다. (E=mc²)'
+            },
+            { 
+                id: 'Q4', 
+                question: '경제학의 수요와 공급 법칙을 3줄로 정리해줘.',
+                answer: '수요: 가격이 낮아지면 구매하려는 양이 늘어납니다. 공급: 가격이 높아지면 판매하려는 양이 늘어납니다. 두 곡선이 만나는 곳에서 균형 가격이 형성됩니다.'
+            },
+            { 
+                id: 'Q5', 
+                question: '프랑스 혁명의 주요 사건 순서를 알려줘.',
+                answer: '삼부회 소집 → 바스티유 감옥 습격 → 인권 선언 발표 → 루이 16세 처형 → 나폴레옹 집권으로 이어졌습니다.'
+            },
+        ];
+
+
+        // --- PHYSICS & ORB LOGIC ---
+
+        function addOrb(x, y, isHardEarned = false, content = '지식') {
+            const orbX = x;
+            const orbY = y;
+            
+            const id = Date.now() + Math.random();
+            const vx = (Math.random() - 0.5) * 6; 
+            const vy = isHardEarned ? 0 : -5;
+            orbs.push({
+                id,
+                x: orbX, 
+                y: orbY,
+                vx,
+                vy,
+                opacity: 1,
+                isDissolving: false,
+                createdAt: Date.now(),
+                isHardEarned,
+                content 
+            });
+        }
+
+        function updatePhysics() {
+            const now = Date.now();
+            
+            // 1. Orb-Orb Collision (Repulsion)
+            for (let i = 0; i < orbs.length; i++) {
+                for (let j = i + 1; j < orbs.length; j++) {
+                    const orb1 = orbs[i];
+                    const orb2 = orbs[j];
+                    
+                    const dx = orb1.x - orb2.x;
+                    const dy = orb1.y - orb2.y;
+                    const distanceSq = dx * dx + dy * dy;
+                    
+                    if (distanceSq < ORB_REPULSION_DISTANCE_SQUARED && distanceSq > 0) {
+                        const distance = Math.sqrt(distanceSq);
+                        const overlap = (ORB_RADIUS * 2) - distance;
+                        
+                        const nx = dx / distance;
+                        const ny = dy / distance;
+                        
+                        const impulse = overlap * 0.05 * ORB_REPULSION_STRENGTH;
+                        
+                        orb1.vx += nx * impulse;
+                        orb1.vy += ny * impulse;
+                        orb2.vx -= nx * impulse;
+                        orb2.vy -= ny * impulse;
+                        
+                        const adjust = overlap / 2;
+                        orb1.x += nx * adjust;
+                        orb1.y += ny * adjust;
+                        orb2.x -= nx * adjust;
+                        orb2.y -= ny * adjust;
+                    }
+                }
+            }
+            
+            // 2. Movement and Boundary Constraints
+            orbs = orbs.map(orb => {
+                let { x, y, vx, vy, opacity, isDissolving, createdAt, isHardEarned } = orb;
+
+                if (isHardEarned) { 
+                    vy += gravity;
+                    vx *= friction;
+                } else { 
+                    vy *= 0.99; 
+                    vx *= 0.99;
+                    vy += (Math.random() - 0.5) * 0.4; 
+                    vx += (Math.random() - 0.5) * 0.4; 
+                }
+                
+                x += vx;
+                y += vy;
+
+                // Horizontal Constraint 
+                if (x < WALL_LEFT_X) {
+                    x = WALL_LEFT_X;
+                    vx = -vx * 0.5;
+                }
+                if (x > WALL_RIGHT_X) {
+                    x = WALL_RIGHT_X;
+                    vx = -vx * 0.5;
+                }
+                
+                // Vertical Ceiling Constraint 
+                const CEILING_Y = BOWL_SIZE * 0.05;
+                if (y < CEILING_Y) {
+                    y = CEILING_Y;
+                    vy = -vy * 0.5;
+                }
+
+                // Floor Collision 
+                if (y > BOWL_FLOOR_Y_RELATIVE) {
+                    if (isHardEarned) {
+                        y = BOWL_FLOOR_Y_RELATIVE;
+                        vy = -vy * 0.4;
+                        if (Math.abs(vy) < 1) vy = 0; 
+                        if (vy === 0) vx = vx * 0.8;
+                    } else {
+                        if (!isDissolving) {
+                            isDissolving = true;
+                            createdAt = now - 5000; 
+                        }
+                        y = BOWL_FLOOR_Y_RELATIVE;
+                        vy = -vy * 0.1; 
+                        vx = vx * 0.9;
+                    }
+                }
+                
+                // Lifetime Logic
+                const DISSOLVE_TIME = 6000; 
+                if (!isHardEarned) {
+                    if (now - createdAt > DISSOLVE_TIME) {
+                        isDissolving = true;
+                        opacity -= 0.01;
+                    }
+                }
+
+                return { ...orb, x, y, vx, vy, opacity, isDissolving, createdAt, isHardEarned };
+            }).filter(orb => orb.opacity > 0);
+        }
+
+        function renderOrbs() {
+            orbArea.innerHTML = orbs.map(orb => {
+                const isCyan = !orb.isHardEarned;
+                const isPurple = orb.isHardEarned;
+
+                const isSettled = isPurple && Math.abs(orb.vy) < 1 && orb.y > BOWL_FLOOR_Y_RELATIVE - 5;
+                const floatingClass = isCyan && !orb.isDissolving && !isSettled ? 'animate-float-slow' : ''; 
+                const positionStyle = `left: ${orb.x}px; top: ${orb.y}px; opacity: ${orb.opacity}; transform: translate(-50%, -50%); transition: opacity 0.5s, transform 0.5s;`;
+
+                // --- EFFORT-BASED KNOWLEDGE (PURPLE TEXT BOX) ---
+                if (isPurple) {
+                    const textContent = orb.content || '노력 지식';
+                    const baseClass = 'max-w-[200px] w-auto p-2 rounded-lg bg-purple-900/80 border-2 border-purple-400 shadow-[0_0_15px_#a855f7] mono-font text-xs text-purple-200 text-left whitespace-normal';
+                    
+                    return `
+                        <div 
+                            class="absolute kr-font ${baseClass} ${floatingClass}"
+                            style="${positionStyle} min-width: 150px; text-shadow: 0 0 3px #a855f7; z-index: 50; ${isSettled ? 'transition: none;' : ''}"
+                        >
+                            <span class="block text-purple-100 font-bold mb-1">Effort Injection Complete</span>
+                            <span class="block text-xs italic">${textContent}</span>
+                        </div>
+                    `;
+                } 
+                // --- AI-BASED KNOWLEDGE (CYAN TEXT BOX) ---
+                else {
+                    const textContent = orb.content || 'AI 지식'; 
+                    
+                    const volatileClass = orb.isDissolving ? 'shadow-[0_0_15px_#f00] border-red-400 bg-red-900/80 text-red-200 transition-colors duration-1000' : '';
+                    const baseClass = 'max-w-[200px] w-auto p-2 rounded-lg bg-cyan-900/80 border-2 border-cyan-400 shadow-[0_0_15px_#0ff] mono-font text-xs text-cyan-200 text-left whitespace-normal transition-colors duration-300';
+                    
+                    return `
+                        <div 
+                            class="absolute kr-font ${baseClass} ${volatileClass} ${floatingClass}"
+                            style="${positionStyle} min-width: 150px; text-shadow: 0 0 3px #0ff; z-index: 50;"
+                        >
+                            <span class="block text-cyan-100 font-bold mb-1">AI Injection Complete</span>
+                            <span class="block text-xs italic">${textContent}</span>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        function gameLoop() {
+            updatePhysics();
+            renderOrbs();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+        
+        // --- MODAL & UI RENDERING ---
+
+        function openReportModal(report) {
+            const themeClasses = {
+                blue: { color: 'text-cyan-400', border: 'border-cyan-500', bg: 'bg-cyan-900/20' },
+                red: { color: 'text-red-400', border: 'border-red-500', bg: 'bg-red-900/20' },
+                green: { color: 'text-green-400', border: 'border-green-500', bg: 'bg-green-900/20' }
+            }[report.theme];
+
+            const modalHtml = `
+                <div id="report-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 transition-opacity duration-300" onclick="closeModal('report-modal')">
+                    <div 
+                        class="w-full max-w-3xl ${themeClasses.bg} border-2 ${themeClasses.border} rounded-2xl p-8 shadow-[0_0_50px_rgba(0,255,255,0.4)] transition-transform duration-500 scale-100 animate-fade-in"
+                        onclick="event.stopPropagation()"
+                    >
+                        <div class="flex items-start justify-between border-b border-gray-700 pb-4 mb-6">
+                            <div class="flex flex-col">
+                                <h2 class="text-xl md:text-3xl font-black cyber-font text-white">${report.heading}</h2>
+                                <p class="text-sm mono-font ${themeClasses.color} mt-1">${report.title}</p>
+                            </div>
+                            <button 
+                                onclick="closeModal('report-modal')" 
+                                class="text-gray-400 hover:text-white transition-colors p-2 rounded-full border ${themeClasses.border} hover:bg-black/50"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="max-h-[70vh] overflow-y-auto pr-4">
+                            <p class="text-base leading-relaxed text-gray-200 mb-6 kr-font">${report.content}</p>
+
+                            <div class="p-4 rounded border-l-4 ${themeClasses.border} bg-gray-900/50">
+                                <p class="text-xs font-mono tracking-wider ${report.theme === 'red' ? 'text-red-400' : themeClasses.color}">${report.error}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modalsContainer.innerHTML = modalHtml;
+        }
+        
+        function openGuideModal() {
+            const modalHtml = `
+                <div id="guide-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 transition-opacity duration-300" onclick="closeModal('guide-modal')">
+                    <div 
+                        class="w-full max-w-lg bg-gray-900/90 border-2 border-green-500 rounded-2xl p-8 shadow-[0_0_50px_rgba(50,255,50,0.4)] transition-transform duration-500 scale-100 animate-fade-in"
+                        onclick="event.stopPropagation()"
+                    >
+                        <div class="flex items-start justify-between border-b border-gray-700 pb-4 mb-6">
+                            <h2 class="text-xl md:text-2xl font-black mono-font text-white flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-terminal inline mr-2 text-green-400"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="17" y2="17"/></svg>
+                                <span class="kr-font">실험 가이드</span>
+                            </h2>
+                            <button 
+                                onclick="closeModal('guide-modal')" 
+                                class="text-gray-400 hover:text-white transition-colors p-2 rounded-full border border-green-500 hover:bg-black/50"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="max-h-[70vh] overflow-y-auto pr-4 kr-font text-base">
+                            <ul class="list-disc list-inside space-y-4 text-gray-300 ml-4">
+                                <li>
+                                    <span class="font-bold">AI 터미널 클릭 시 질문을 선택하여 AI 지식을 주입하세요. <br> (자동으로 뇌 박스 상단에서 떨어집니다.) </br> </span> 
+                                </li>
+                                <li>
+                                    <span class="text-cyan-400 font-bold">AI 지식</span>은 쉽게 얻어지지만 <span class="text-cyan-400 font-bold">빠르게 증발</span>합니다. <br> (<span class="text-yellow-400 font-bold">6초 후 소멸</span>) </br>
+                                </li>
+                              
+                                <li>
+                                    <span class="font-bold">심층 탐구 아카이브(책)을 <span class="text-cyan-400 font-bold">5초 이상</span> 페이지를 읽으면,<br> 노력을 통해 얻은 지식이 뇌로 <span class="text-green-400 font-bold">자동 저장</span>됩니다. </br>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modalsContainer.innerHTML = modalHtml;
+        }
+
+        // --- STUDY BOOK MODAL & LOGIC (Design: Dark Mode Textbook / The Illuminated Artifact) ---
+
+        function openStudyModal() {
+            currentStudyPage = 0;
+            renderStudyPage();
+        }
+
+        function closeStudyModal() {
+            stopStudyTimer();
+            closeModal('study-modal');
+        }
+
+        function renderStudyPage() {
+            const pageData = STUDY_CONTENT[currentStudyPage];
+            const isFirst = currentStudyPage === 0;
+            const isLast = currentStudyPage === STUDY_CONTENT.length - 1;
+            const knowledgeContent = pageData.knowledge; 
+
+            // Updated Design: Dark Mode Textbook
+            const modalHtml = `
+                <div id="study-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 transition-opacity duration-300" onclick="closeStudyModal()">
+                    
+                    <div 
+                        class="relative w-full max-w-3xl aspect-[3/4] md:aspect-[4/3] bg-[#110f1a] rounded-r-2xl rounded-l-sm shadow-[0_0_60px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden book-page-enter border border-gray-800"
+                        style="box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 20px 50px rgba(0,0,0,0.8);"
+                        onclick="event.stopPropagation()"
+                    >
+                        <div class="absolute inset-0 scanlines opacity-5 pointer-events-none mix-blend-screen"></div>
+                        
+                        <div class="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-black via-gray-900 to-[#110f1a] border-r border-gray-800 shadow-xl z-10 flex flex-col justify-center items-center">
+                             <div class="w-[1px] h-full bg-gray-700/30"></div>
+                        </div>
+
+                        <div class="flex-grow p-10 md:p-16 ml-6 flex flex-col relative text-gray-300 overflow-y-auto">
+                            
+                            <div class="mb-10 border-b border-gray-700 pb-6 flex justify-between items-end">
+                                <div>
+                                    <span class="block text-xs font-bold tracking-[0.2em] text-purple-400 uppercase mb-2 serif-font">Subject: Deep Learning Archive</span>
+                                    <h3 class="text-2xl md:text-4xl font-black serif-font text-gray-100 leading-tight">
+                                        ${pageData.title}
+                                    </h3>
+                                </div>
+                                <span class="text-4xl font-thin serif-font text-gray-700 select-none">0${currentStudyPage + 1}</span>
+                            </div>
+
+                            <div class="flex-grow">
+                                <p class="text-lg md:text-xl leading-9 serif-font font-light text-gray-300 break-keep text-justify">
+                                    <span class="text-5xl float-left mr-3 font-bold leading-none mt-[-4px] text-purple-500 font-serif">${pageData.text.charAt(0)}</span>${pageData.text.slice(1)}
+                                </p>
+                            </div>
+
+                            <div class="mt-12 mb-6">
+                                <div class="flex justify-between text-xs font-bold mb-2 text-purple-400 mono-font tracking-wider">
+                                    <span>NEURAL UPLOAD PROGRESS</span>
+                                    <span id="study-status">0%</span>
+                                </div>
+                                <div class="w-full h-1 bg-gray-800 rounded-full overflow-visible relative">
+                                    <div class="absolute top-0 left-0 h-full w-full bg-purple-900/20 blur-sm rounded-full"></div>
+                                    
+                                    <div id="study-progress" class="h-full bg-purple-500 w-0 transition-all duration-100 ease-linear shadow-[0_0_10px_#a855f7] rounded-full relative">
+                                        <div class="absolute right-0 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_5px_#fff]"></div>
+                                    </div>
+                                </div>
+                                <p id="study-feedback" class="h-6 text-center text-sm font-bold text-green-400 mt-3 opacity-0 transition-opacity duration-500 mono-font">
+                                    >> KNOWLEDGE SECURED.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center px-10 py-5 ml-6 border-t border-gray-800 bg-[#0c0a12]">
+                            <button 
+                                onclick="changeStudyPage(-1)"
+                                class="flex items-center gap-2 px-4 py-2 rounded text-gray-500 hover:text-gray-200 hover:bg-white/5 transition-all serif-font text-sm ${isFirst ? 'invisible' : ''}"
+                            >
+                                ← Prev Page
+                            </button>
+                            
+                            <button 
+                                onclick="closeStudyModal()"
+                                class="px-5 py-2 text-red-400 hover:text-red-300 font-bold text-xs tracking-widest uppercase border border-red-900/50 hover:bg-red-900/20 rounded transition-colors mono-font"
+                            >
+                                Close Archive
+                            </button>
+
+                            <button 
+                                onclick="changeStudyPage(1)"
+                                class="flex items-center gap-2 px-4 py-2 rounded text-gray-500 hover:text-gray-200 hover:bg-white/5 transition-all serif-font text-sm ${isLast ? 'invisible' : ''}"
+                            >
+                                Next Page →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modalsContainer.innerHTML = modalHtml;
+
+            // Start Timer for this page
+            startStudyTimer(knowledgeContent);
+        }
+
+        function changeStudyPage(direction) {
+            currentStudyPage += direction;
+            stopStudyTimer(); 
+            renderStudyPage(); 
+        }
+
+        function startStudyTimer(knowledgeContent) {
+            studyTimeElapsed = 0;
+            const statusEl = document.getElementById('study-status');
+            const progressEl = document.getElementById('study-progress');
+            const feedbackEl = document.getElementById('study-feedback');
+
+            if (studyTimer) clearInterval(studyTimer);
+
+            studyTimer = setInterval(() => {
+                studyTimeElapsed++;
+                const percentage = Math.min(100, (studyTimeElapsed / STUDY_REQUIRED_TIME) * 100);
+                
+                if (progressEl) progressEl.style.width = `${percentage}%`;
+                if (statusEl) statusEl.innerText = `${Math.floor(percentage)}%`;
+
+                if (studyTimeElapsed >= STUDY_REQUIRED_TIME) {
+                    clearInterval(studyTimer);
+                    injectKnowledge(knowledgeContent);
+                    if (statusEl) statusEl.innerText = "100%";
+                    if (feedbackEl) feedbackEl.style.opacity = '1';
+                }
+            }, 100); 
+        }
+
+        function stopStudyTimer() {
+            if (studyTimer) clearInterval(studyTimer);
+            studyTimer = null;
+        }
+
+        function injectKnowledge(content) {
+            const minX = BOWL_SIZE * 0.20; 
+            const maxX = BOWL_SIZE * 0.80; 
+            const startX = Math.random() * (maxX - minX) + minX;
+
+            addOrb(startX, BOWL_SIZE * 0.1, true, content);
+        }
+
+
+        // Query Modal Logic
+        function openQueryModal() {
+            const queryButtons = QUERY_DATA.map(q => `
+                <button 
+                    onclick="handleQuery('${q.id}')"
+                    class="w-full text-left p-3 rounded-lg bg-gray-700/50 hover:bg-cyan-900/50 border border-cyan-700/50 text-white kr-font transition-all duration-200 flex flex-col gap-1 text-sm md:text-base"
+                >
+                    <span class="text-cyan-400 mono-font font-bold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square-text"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="13" x2="18" y1="10" y2="10"/><line x1="13" x2="18" y1="6" y2="6"/><line x1="8" x2="10" y1="8" y2="8"/></svg>
+                        ${q.id}
+                    </span>
+                    <span class="text-gray-300 text-xs md:text-sm pl-6">${q.question}</span>
+                </button>
+            `).join('');
+
+            const modalHtml = `
+                <div id="query-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 transition-opacity duration-300" onclick="closeModal('query-modal')">
+                    <div 
+                        class="w-full max-w-xl bg-gray-900/90 border-2 border-cyan-500 rounded-2xl p-8 shadow-[0_0_50px_rgba(0,255,255,0.4)] transition-transform duration-500 scale-100 animate-fade-in"
+                        onclick="event.stopPropagation()"
+                    >
+                        <div class="flex items-start justify-between border-b border-gray-700 pb-4 mb-6">
+                            <h2 class="text-xl md:text-2xl font-black mono-font text-white flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                &gt; _ <span class="kr-font">[지식 검색]</span>
+                            </h2>
+                            <button 
+                                onclick="closeModal('query-modal')" 
+                                class="text-gray-400 hover:text-white transition-colors p-2 rounded-full border border-cyan-500 hover:bg-black/50"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="max-h-[70vh] overflow-y-auto pr-4 kr-font text-base">
+                            <p class="text-gray-400 mb-6">AI에게 주입할 '질문'을 선택하세요. AI가 요약한 지식은 휘발성이 강합니다.</p>
+                            <div class="space-y-3">
+                                ${queryButtons}
+                            </div>
+                            <p class="text-xs text-red-400 mt-6 mono-font">* MAX 5 QUERIES AVAILABLE.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modalsContainer.innerHTML = modalHtml;
+        }
+
+        // Query Handling Logic 
+        function handleQuery(questionId) {
+            closeModal('query-modal');
+            const queryData = QUERY_DATA.find(q => q.id === questionId);
+            if (!queryData) return;
+
+            const minX = BOWL_SIZE * 0.20; 
+            const maxX = BOWL_SIZE * 0.80; 
+            const startX = Math.random() * (maxX - minX) + minX;
+
+            addOrb(startX, BOWL_SIZE * 0.1, false, queryData.answer);
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function renderReportCards() {
+            reportCardsContainer.innerHTML = REPORT_DATA.map(report => {
+                const themeClasses = {
+                    blue: { color: 'text-cyan-400', border: 'border-cyan-500/50' },
+                    red: { color: 'text-red-400', border: 'border-red-500/50' },
+                    green: { color: 'text-green-400', border: 'border-green-500/50' }
+                }[report.theme];
+                
+                return `
+                    <div 
+                        class="w-full p-6 bg-gray-900/70 border ${themeClasses.border} rounded-xl backdrop-blur-sm flex flex-col items-center text-center cursor-pointer transition-all duration-300 hover:scale-[1.03]"
+                        onclick="openReportModal(REPORT_DATA.find(r => r.id === '${report.id}'))"
+                    >
+                        <div class="w-16 h-16 mb-4 rounded-full flex items-center justify-center border-2 ${themeClasses.border} bg-black/50 ${themeClasses.color} animate-pulse-slow">
+                            ${report.icon}
+                        </div>
+                        <p class="text-xs mono-font ${themeClasses.color} mb-1 tracking-widest"> [${report.code}]</p>
+                        <h3 class="text-xl font-bold text-white kr-font">${report.title}</h3>
+                        <p class="text-sm text-gray-400 mt-2 kr-font">분석 내용 열기</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- EVENT LISTENERS & INITIALIZATION ---
+
+        function handleScroll() {
+            const totalScroll = document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const docHeight = document.documentElement.scrollHeight;
+            
+            const progress = totalScroll / (docHeight - windowHeight);
+            const scrollProgress = Math.max(0, Math.min(1, progress));
+            
+            document.getElementById('progress-bar').style.width = `${scrollProgress * 100}%`;
+        }
+
+        window.onload = function () {
+            gameLoop();
+            renderReportCards();
+            document.addEventListener('scroll', handleScroll);
+            document.getElementById('guide-modal-open-btn').addEventListener('click', openGuideModal);
+        };
+    </script>
+</body>
+</html>
